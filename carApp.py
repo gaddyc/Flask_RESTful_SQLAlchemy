@@ -182,8 +182,7 @@ def carAvg():
 #  FROM car group by LocationNum;
 @app.route('/car/LocationNum', methods=['GET'])
 def carLocation():
-	loco = db.session.query(func.count(car.LocationNum),
-		car.LocationNum).group_by(car.LocationNum)
+	loco = db.session.query(func.count(car.LocationNum).label("count"),car.LocationNum.label("LocationNum")).group_by(car.LocationNum)
 
 	#print(loco,loco.all())
 	return car_LocationNum.jsonify(loco.all())

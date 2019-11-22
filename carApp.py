@@ -188,7 +188,15 @@ def carLocation():
 	#print(loco,loco.all())
 	return car_LocationNum.jsonify(loco.all())
  
+#@app.route('/car/LocationNum', methods=['GET'])
+#def carLocation():
+#    print(request.args.get("minimumCount"))
+#    minimumCount = int(request.args.get('minimumCount')) or 100
+#    loco = db.session.query(func.count(car.LocationNum).label("count"), car.LocationNum.label("LocationNum")).\
+#        group_by(car.LocationNum).having(func.count(car.LocationNum) > minimumCount)
 
+    #print(loco,loco.all())
+#    return car_LocationNum.jsonify(loco.all())
 #run server
 if __name__ == "__main__":
 	app.run(debug=True, port=5000)

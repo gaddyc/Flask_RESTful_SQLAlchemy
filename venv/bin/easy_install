@@ -1,5 +1,4 @@
-#!/Users/charla/Desktop/Flask_RESTful_SQLAlchemy/venv/bin/python3
-
+#!/Users/charla/Desktop/Flask_RESTful_SQLAlchemy/venv/bin/python3.7
 # -*- coding: utf-8 -*-
 import re
 import sys

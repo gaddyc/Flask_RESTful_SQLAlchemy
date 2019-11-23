@@ -61,10 +61,17 @@ import os
 from sqlalchemy import func
 from sqlalchemy import *
 
+from flask_smorest import Api, Blueprint, abort
+from webargs import fields
+from webargs.flaskparser import use_args
 
 from flask import Flask, jsonify, request
 app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+#Smorest 
+app.config['OPENAPI_VERSION'] = '3.0.2'
+app.config['OPENAPI_URL_PREFIX'] = "swagger"
 
 #database setup
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir,'db.sqlite')
@@ -73,7 +80,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 #initialize
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
-
+api = Api(app)
 
 #db table
 class car(db.Model):
@@ -142,8 +149,13 @@ cars_schema = carSchema(many=True)
 car_sum_schema = carSumSchema()
 car_LocationNum = carLocoSchema(many=True)
 
+blp = Blueprint(
+    'cars', 'cars', url_prefix='/car',
+    description='Operations on cars'
+)
+
 #get all cars
-@app.route('/car', methods=['GET'])
+@blp.route('', methods=['GET'])
 def getCars():
 	allCars = car.query.all()
 	#print(allCars)
@@ -152,13 +164,13 @@ def getCars():
 	return jsonify(result)
 
 #get a single car
-@app.route('/car/<id>', methods=['GET'])
+@blp.route('/<id>', methods=['GET'])
 def getCar(id):
 	onecar = car.query.get(id)
 	return car_schema.jsonify(onecar)
 
 #Get odometer for one car
-@app.route('/car/<id>/Odometer', methods=['GET'])
+@blp.route('/<id>/Odometer', methods=['GET'])
 def getOdo(id):
 	carId = car.query.get(id)
 	odometer = carId.Odometer
@@ -166,7 +178,7 @@ def getOdo(id):
 	return jsonify(odometer)
 
 #Calculate the average purchase value of all cars
-@app.route('/car/PurchVal', methods=['GET'])
+@blp.route('/PurchVal', methods=['GET'])
 def carAvg():
 	totalVal = db.session.query(func.avg(car.PurchVal)).scalar()
 	totalCount = db.session.query(func.count(car.PurchVal)).scalar()
@@ -180,6 +192,7 @@ def carAvg():
 #Calculate the number of vehicles purchased per store	
 #SELECT COUNT(*), LocationNum
 #  FROM car group by LocationNum;
+<<<<<<< HEAD
 #@app.route('/car/LocationNum', methods=['GET'])
 #def carLocation():
 #	loco = db.session.query(func.count(car.LocationNum).label("count"),car.LocationNum.label("LocationNum")).group_by(car.LocationNum)
@@ -196,6 +209,30 @@ def carLocation():
 	print(loco,loco.all())
 	return car_LocationNum.jsonify(loco.all())
 
+=======
+@blp.route('/LocationNum', methods=['GET'])
+@use_args({"LocationNum": fields.Str(required=False), "CountAtLeast": fields.Int(required=False, missing=100)})
+def carLocation(args):
+	minimumCount = int(args["CountAtLeast"])
+
+	loco = db.session.query(func.count(car.LocationNum).label("count"),car.LocationNum.label("LocationNum")).\
+		group_by(car.LocationNum).having(func.count(car.LocationNum) > int(minimumCount))
+
+	#print(loco,loco.all())
+	return car_LocationNum.jsonify(loco.all())
+ 
+#@blp.route('/car/LocationNum', methods=['GET'])
+#def carLocation():
+#    print(request.args.get("minimumCount"))
+#    minimumCount = int(request.args.get('minimumCount')) or 100
+#    loco = db.session.query(func.count(car.LocationNum).label("count"), car.LocationNum.label("LocationNum")).\
+#        group_by(car.LocationNum).having(func.count(car.LocationNum) > minimumCount)
+
+    #print(loco,loco.all())
+#    return car_LocationNum.jsonify(loco.all())
+
+api.register_blueprint(blp)
+>>>>>>> origin/dev
 
 #run server
 if __name__ == "__main__":

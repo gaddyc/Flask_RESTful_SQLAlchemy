@@ -61,6 +61,8 @@ import os
 from sqlalchemy import func
 from sqlalchemy import *
 
+from webargs import fields
+from webargs.flaskparser import use_args
 
 from flask import Flask, jsonify, request
 app = Flask(__name__)
@@ -181,8 +183,12 @@ def carAvg():
 #SELECT COUNT(*), LocationNum
 #  FROM car group by LocationNum;
 @app.route('/car/LocationNum', methods=['GET'])
-def carLocation():
-	loco = db.session.query(func.count(car.LocationNum).label("count"),car.LocationNum.label("LocationNum")).group_by(car.LocationNum)
+@use_args({"LocationNum": fields.Str(required=False), "CountAtLeast": fields.Int(required=False, missing=100)})
+def carLocation(args):
+	minimumCount = int(args["CountAtLeast"])
+	
+	loco = db.session.query(func.count(car.LocationNum).label("count"),car.LocationNum.label("LocationNum")).\
+		group_by(car.LocationNum).having(func.count(car.LocationNum) > int(minimumCount))
 
 	#print(loco,loco.all())
 	return car_LocationNum.jsonify(loco.all())

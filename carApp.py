@@ -133,7 +133,7 @@ class carSumSchema(ma.Schema):
 #car location number schema
 class carLocoSchema(ma.Schema):
     class Meta:
-        fields = ("count","LocationNum")
+        fields = ("count","LocationNum","minimumCount")
 
 
 # init schema
@@ -180,22 +180,23 @@ def carAvg():
 #Calculate the number of vehicles purchased per store	
 #SELECT COUNT(*), LocationNum
 #  FROM car group by LocationNum;
-@app.route('/car/LocationNum', methods=['GET'])
-def carLocation():
-	loco = db.session.query(func.count(car.LocationNum).label("count"),car.LocationNum.label("LocationNum")).group_by(car.LocationNum)
-
-	#print(loco,loco.all())
-	return car_LocationNum.jsonify(loco.all())
- 
 #@app.route('/car/LocationNum', methods=['GET'])
 #def carLocation():
-#    print(request.args.get("minimumCount"))
-#    minimumCount = int(request.args.get('minimumCount')) or 100
-#    loco = db.session.query(func.count(car.LocationNum).label("count"), car.LocationNum.label("LocationNum")).\
-#        group_by(car.LocationNum).having(func.count(car.LocationNum) > minimumCount)
+#	loco = db.session.query(func.count(car.LocationNum).label("count"),car.LocationNum.label("LocationNum")).group_by(car.LocationNum)
+#	print(loco,loco.all())
+#	return car_LocationNum.jsonify(loco.all())
+# 
+@app.route('/car/LocationNum', methods=['GET'])
+def carLocation():
+	print(request.args.get("minimumCount"))
+	minimumCount = int(request.args.get('minimumCount')) or 100
+	loco = db.session.query(func.count(car.LocationNum).label("count"), car.LocationNum.label("LocationNum")).\
+		group_by(car.LocationNum).having(func.count(car.LocationNum) > minimumCount)
+	
+	print(loco,loco.all())
+	return car_LocationNum.jsonify(loco.all())
 
-    #print(loco,loco.all())
-#    return car_LocationNum.jsonify(loco.all())
+
 #run server
 if __name__ == "__main__":
 	app.run(debug=True, port=5000)

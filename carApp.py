@@ -189,7 +189,7 @@ def carAvg():
     # return jsonify({'sum': str(totalVal)})
     return car_sum_schema.jsonify({'sum': str(totalVal), 'total': str(totalCount)})
 
-# Calculate the number of vehicles purchased per store    
+# Calculate the number of vehicles purchased per store
 # SELECT COUNT(*), LocationNum
 #  FROM car group by LocationNum;
 @blp.route('/LocationNum', methods=['GET'])

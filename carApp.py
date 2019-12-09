@@ -6,6 +6,7 @@
 # pip3 install flask_marshmallow 
 # pip3 install flask_sqlalchemy
 # pip3 install marshmallow-sqlalchemy
+# pip3 install flask-smorest
 # python3 carApp.py
 
 # ##Leave venv
@@ -142,13 +143,18 @@ class carLocoSchema(ma.Schema):
 
         fields = ("count", "LocationNum")
 
+# car make schema
+class carMakeSchema(ma.Schema):
+    class Meta:
 
+        fields = ("count", "Make")
 
 # init schema
 car_schema = carSchema()
 cars_schema = carSchema(many=True)
 car_sum_schema = carSumSchema()
 car_LocationNum = carLocoSchema(many=True)
+car_make = carMakeSchema(many=True)
 
 blp = Blueprint(
     'cars', 'cars', url_prefix='/car',
@@ -196,7 +202,9 @@ def carAvg():
 #  FROM car group by LocationNum;
 
 @blp.route('/LocationNum', methods=['GET'])
-@use_args({"LocationNum": fields.Str(required=False), "CountAtLeast": fields.Int(required=False, missing=100)})
+@use_args({
+    "LocationNum": fields.Str(required=False), 
+    "CountAtLeast": fields.Int(required=False, missing=100)})
 def carLocation(args):
     minimumCount = int(args["CountAtLeast"])
 
@@ -208,15 +216,22 @@ def carLocation(args):
     # print(loco,loco.all())
     return car_LocationNum.jsonify(loco.all())
 
-# @blp.route('/car/LocationNum', methods=['GET'])
-# def carLocation():
-#    print(request.args.get("minimumCount"))
-#    minimumCount = int(request.args.get('minimumCount')) or 100
-#    loco = db.session.query(func.count(car.LocationNum).label("count"), car.LocationNum.label("LocationNum")).\
-#        group_by(car.LocationNum).having(func.count(car.LocationNum) > minimumCount)
+#calculate sorted list of the following: 
+#most commonly sold makes/brand/SaleType for total and per SaleLoc
+#SELECT COUNT(*), Make, Brand, SaleType
+#FROM car group by Make
+#order by COUNT(*) desc;
+
+@blp.route('/Make', methods=['GET'])
+@use_args({"Make": fields.Str(required=False),"CountAtLeast": fields.Int(required=False, missing=100)})
+def commonlySold(args):
+    minimumCount = int(args["CountAtLeast"])
+    carMake = db.session.query(func.count(car.Make).label("count"),car.Make.label("Make")).\
+    group_by(car.Make).\
+    having(func.count(car.Make) > int(minimumCount))
 
     # print(loco,loco.all())
-#    return car_LocationNum.jsonify(loco.all())
+    return car_make.jsonify(carMake.all())
 
 
 api.register_blueprint(blp)

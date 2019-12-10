@@ -1,6 +1,7 @@
 # ##Set up venv
 #
-# python3 -m venv venv
+# 
+
 # virtualenv venv
 # source venv/bin/activate
 # pip3 install flask_marshmallow 
@@ -41,8 +42,8 @@
 # EngineType                Engine size in cylinders
 # Make                    Model name
 # Miles                    Odometer reading at time of inventory
-# SaleType                (R) for resale, (N) for new vehicle
 # Odometer                Accuracy of odometer reading
+# brand                  Vehicle make
 # VehType                Passenger, Truck, or Motorcycle
 # LocationNum            ID number of store that acquired vehicle
 # CarType                Vehicle segment type
@@ -71,7 +72,7 @@ app.config['OPENAPI_VERSION'] = '3.0.2'
 app.config['OPENAPI_URL_PREFIX'] = "swagger"
 
 # database setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + os.path.join(basedir, 'db0.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # nitialize
@@ -92,6 +93,7 @@ class car(db.Model):
     Miles = db.Column(db.Float)
     Odometer = db.Column(db.String)
     Brand = db.Column(db.String)
+    VehType = db.Column(db.String)
     LocationNum = db.Column(db.Integer)
     CarType = db.Column(db.String)
     EngineLiters = db.Column(db.String)
@@ -181,7 +183,7 @@ def getCar(id):
 def getOdo(id):
     carId = car.query.get(id)
     odometer = carId.Odometer
-    # print(carId, odometer)
+    print(carId, odometer)
     return jsonify(odometer)
 
 
@@ -218,12 +220,15 @@ def carLocation(args):
 
 #calculate sorted list of the following: 
 #most commonly sold makes/brand/SaleType for total and per SaleLoc
+#
 #SELECT COUNT(*), Make, Brand, SaleType
 #FROM car group by Make
 #order by COUNT(*) desc;
 
 @blp.route('/Make', methods=['GET'])
-@use_args({"Make": fields.Str(required=False),"CountAtLeast": fields.Int(required=False, missing=100)})
+@use_args({
+    "Make": fields.Str(required=False),
+    "CountAtLeast": fields.Int(required=False, missing=100)})
 def commonlySold(args):
     minimumCount = int(args["CountAtLeast"])
     carMake = db.session.query(func.count(car.Make).label("count"),car.Make.label("Make")).\

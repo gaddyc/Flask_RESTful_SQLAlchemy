@@ -73,7 +73,7 @@ app.config['OPENAPI_VERSION'] = '3.0.2'
 app.config['OPENAPI_URL_PREFIX'] = "swagger"
 
 # database setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite') #sql type
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # nitialize
@@ -168,7 +168,7 @@ blp = Blueprint(
 @blp.route('', methods=['GET'])
 def getCars():
     allCars = car.query.all()
-    # print(allCars)
+    #print(allCars)
     result = cars_schema.dump(allCars)
     # print(result)
     return jsonify(result)
@@ -184,7 +184,7 @@ def getCar(id):
 def getOdo(id):
     carId = car.query.get(id)
     odometer = carId.Odometer
-    print(carId, odometer)
+    #print(carId, odometer)
     return jsonify(odometer)
 
 

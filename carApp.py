@@ -2,7 +2,8 @@
 #
 # 
 
-# virtualenv venv
+# 
+
 # source venv/bin/activate
 # pip3 install flask_marshmallow 
 # pip3 install flask_sqlalchemy
@@ -72,7 +73,7 @@ app.config['OPENAPI_VERSION'] = '3.0.2'
 app.config['OPENAPI_URL_PREFIX'] = "swagger"
 
 # database setup
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////' + os.path.join(basedir, 'db0.sqlite')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'db.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # nitialize
@@ -106,8 +107,8 @@ class car(db.Model):
         return "<Car " + self.name + ">"
 
 
-# db.create_all()
-# db.session.commit()
+#db.create_all()
+#db.session.commit()
 
 # Car schema
 class carSchema(ma.Schema):
